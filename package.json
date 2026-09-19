@@ -1,0 +1,27 @@
+{
+  "name": "real-time-client-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Real-Time Client Project Dashboard monorepo",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev -w server\" \"npm run dev -w client\"",
+    "build": "npm run build -w server && npm run build -w client",
+    "lint": "npm run lint -w server && npm run lint -w client",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md,css}\"",
+    "test": "npm run test -w server",
+    "db:migrate": "npm run db:migrate -w server",
+    "db:seed": "npm run db:seed -w server",
+    "db:generate": "npm run db:generate -w server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "prettier": "^3.4.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

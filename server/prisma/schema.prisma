@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         String   // ADMIN | PROJECT_MANAGER | DEVELOPER
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  managedProjects Project[]      @relation("ProjectManager")
+  assignedTasks   Task[]         @relation("TaskDeveloper")
+  activities      Activity[]
+  notifications   Notification[] @relation("NotificationRecipient")
+  refreshTokens   RefreshToken[]
+
+  @@index([role])
+}
+
+model Client {
+  id        String   @id @default(cuid())
+  name      String
+  email     String?
+  company   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projects Project[]
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  clientId    String
+  managerId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  client     Client     @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  manager    User       @relation("ProjectManager", fields: [managerId], references: [id], onDelete: Restrict)
+  tasks      Task[]
+  activities Activity[]
+
+  @@index([managerId])
+  @@index([clientId])
+}
+
+model Task {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  projectId   String
+  developerId String?
+  status      String    @default("TODO") // TODO | IN_PROGRESS | IN_REVIEW | DONE | OVERDUE
+  priority    String    @default("MEDIUM") // LOW | MEDIUM | HIGH | CRITICAL
+  dueDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  project       Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  developer     User?          @relation("TaskDeveloper", fields: [developerId], references: [id], onDelete: SetNull)
+  activities    Activity[]
+  notifications Notification[]
+
+  @@index([projectId])
+  @@index([developerId])
+  @@index([status])
+  @@index([priority])
+  @@index([dueDate])
+}
+
+model Activity {
+  id        String   @id @default(cuid())
+  userId    String
+  projectId String
+  taskId    String?
+  oldStatus String?
+  newStatus String?
+  message   String?
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  task    Task?   @relation(fields: [taskId], references: [id], onDelete: SetNull)
+
+  @@index([projectId])
+  @@index([taskId])
+  @@index([createdAt])
+  @@index([userId])
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  recipientId String
+  taskId      String?
+  message     String
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  recipient User  @relation("NotificationRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  task      Task? @relation(fields: [taskId], references: [id], onDelete: SetNull)
+
+  @@index([recipientId])
+  @@index([isRead])
+  @@index([createdAt])
+}
+
+model RefreshToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
