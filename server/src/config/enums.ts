@@ -10,6 +10,13 @@ export const UserRole = {
 } as const;
 export type UserRole = (typeof UserRole)[keyof typeof UserRole];
 
+export function toUserRole(value: string): UserRole {
+  if (Object.values(UserRole).includes(value as UserRole)) {
+    return value as UserRole;
+  }
+  throw new Error(`Invalid user role: ${value}`);
+}
+
 export const TaskStatus = {
   TODO: 'TODO',
   IN_PROGRESS: 'IN_PROGRESS',

@@ -4,6 +4,7 @@ import { comparePassword, hashPassword, hashToken } from '../utils/hash.js';
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../utils/jwt.js';
 import type { AuthUser } from '../types/express.js';
 import { UnauthorizedError } from '../utils/errors.js';
+import { toUserRole } from '../config/enums.js';
 
 const REFRESH_COOKIE = 'refreshToken';
 
@@ -55,7 +56,7 @@ export async function login(
     id: user.id,
     email: user.email,
     name: user.name,
-    role: user.role,
+    role: toUserRole(user.role),
   };
 
   const accessToken = signAccessToken(authUser);
@@ -133,8 +134,8 @@ export async function refresh(refreshToken: string): Promise<{
   });
 
   return {
-    user,
-    accessToken: signAccessToken(user),
+    user: { ...user, role: toUserRole(user.role) },
+    accessToken: signAccessToken({ ...user, role: toUserRole(user.role) }),
     refreshToken: newRefresh,
     refreshMaxAge: parseDurationMs(env.JWT_REFRESH_EXPIRES_IN),
   };
@@ -164,7 +165,7 @@ export async function getMe(userId: string): Promise<AuthUser> {
   if (!user) {
     throw new UnauthorizedError('User not found');
   }
-  return user;
+  return { ...user, role: toUserRole(user.role) };
 }
 
 export { hashPassword };
