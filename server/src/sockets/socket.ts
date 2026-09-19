@@ -1,6 +1,6 @@
 import type { Server as HttpServer } from 'http';
 import { Server } from 'socket.io';
-import { env } from '../config/env.js';
+import { isAllowedOrigin } from '../config/cors.js';
 import { setSocketServer } from './socketRegistry.js';
 import { authenticateSocket, type AuthenticatedSocket } from './auth.socket.js';
 import { registerActivityHandlers } from './activity.socket.js';
@@ -11,7 +11,9 @@ import { getCatchUpActivities } from '../services/activity.service.js';
 export function initSocketServer(httpServer: HttpServer): Server {
   const io = new Server(httpServer, {
     cors: {
-      origin: env.CLIENT_URL,
+      origin: (origin, callback) => {
+        callback(null, isAllowedOrigin(origin));
+      },
       credentials: true,
     },
   });

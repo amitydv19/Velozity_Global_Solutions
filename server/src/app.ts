@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { env } from './config/env.js';
+import { isAllowedOrigin } from './config/cors.js';
 import apiRoutes from './routes/index.js';
 import { errorMiddleware } from './middleware/error.middleware.js';
 
@@ -10,7 +11,9 @@ export function createApp() {
 
   app.use(
     cors({
-      origin: env.CLIENT_URL,
+      origin: (origin, callback) => {
+        callback(null, isAllowedOrigin(origin));
+      },
       credentials: true,
     }),
   );

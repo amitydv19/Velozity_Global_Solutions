@@ -2,7 +2,7 @@ import { io, type Socket } from 'socket.io-client';
 import { getAccessToken } from '../lib/api';
 import type { ActivityItem, Notification } from '../types';
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL ?? 'http://localhost:4000';
+const SOCKET_URL = import.meta.env.FRONTEND_URL ?? 'https://velozity-global-solutions-1whz.onrender.com';
 
 let socket: Socket | null = null;
 
