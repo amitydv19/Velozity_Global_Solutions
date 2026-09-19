@@ -16,7 +16,7 @@ export function getRefreshCookieOptions(maxAgeMs: number) {
   return {
     httpOnly: true,
     secure: env.NODE_ENV === 'production',
-    sameSite: 'lax' as const,
+    sameSite: env.NODE_ENV === 'production' ? ('none' as const) : ('lax' as const),
     maxAge: maxAgeMs,
     path: '/api/auth',
   };
